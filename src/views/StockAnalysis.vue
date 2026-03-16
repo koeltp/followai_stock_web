@@ -211,7 +211,7 @@ import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
 import * as echarts from 'echarts';
-import stockApi from '../api/stockApi';
+import api from '../api';
 
 export default {
   name: 'StockAnalysis',
@@ -246,7 +246,7 @@ export default {
       }
       
       analyzing.value = true;
-      analysisResult.value = await stockApi.analyzeStock(
+      analysisResult.value = await api.wyckoff.analyzeStock(
         stockCode.value,
         dateRange.value[0],
         dateRange.value[1]
@@ -265,7 +265,7 @@ export default {
         const startDate = dateRange.length === 2 ? dateRange[0] : null;
         const endDate = dateRange.length === 2 ? dateRange[1] : null;
         
-        const result = await stockApi.getAnalysisHistory(
+        const result = await api.wyckoff.getAnalysisHistory(
           stockCode.value, 
           historyCurrentPage.value, 
           historyPageSize.value,
@@ -311,7 +311,7 @@ export default {
         const startDate = analysisResult.value.start_date;
         const endDate = analysisResult.value.end_date;
         
-        const response = await stockApi.getStockHistory(code, startDate, endDate);
+        const response = await api.stocks.getStockHistory(code, startDate, endDate);
         
         if (response && response.data && response.data.length > 0) {
           await nextTick();

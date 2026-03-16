@@ -1,5 +1,147 @@
-# Vue 3 + Vite
+# Web 项目说明
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 项目简介
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+这是一个基于 Vue 3 + Element Plus 开发的智能股票分析 Web 应用，对接后端 API 服务，为投资者提供直观、专业的股票分析工具。
+
+### 核心技术特点
+
+- **现代化前端框架**：基于 Vue 3 + Composition API 开发，结合 Element Plus 提供美观、响应式的用户界面
+- **AI 驱动分析**：展示后端 qwen3.5-plus 大模型的智能分析结果，提供专业的投资建议
+- **威科夫操盘法**：基于经典的威科夫操盘法理论，分析股票的价格、成交量和市场结构
+- **数据可视化**：集成 ECharts 图表库，提供直观的 K 线图和数据分析可视化
+
+### 主要功能
+
+- 沪深300成分股列表展示和搜索
+- 基于威科夫操盘法的单只股票深度分析
+- 利用 AI 模型的智能分析结果展示
+- 股票筛选历史查看和管理
+- 分析历史记录查询和筛选
+- 系统配置管理
+- 响应式设计，支持多种设备访问
+
+## 项目结构
+
+```
+web/
+├── public/          # 静态资源
+├── src/             # 源码目录
+│   ├── api/         # API 调用模块
+│   ├── router/      # 路由配置
+│   ├── views/       # 页面级组件
+│   ├── App.vue      # 应用根组件
+│   ├── main.js      # 应用入口
+│   └── style.css    # 全局样式
+├── index.html       # HTML 模板
+├── package.json     # 项目配置和依赖
+└── vite.config.js   # Vite 配置
+```
+
+## 环境要求
+
+- Node.js 16+  
+- npm 或 yarn 包管理器
+
+## 安装步骤
+
+### 1. 克隆项目
+
+```bash
+git clone <项目地址>
+cd followai_stock/web
+```
+
+### 2. 安装依赖
+
+使用 npm：
+```bash
+npm install
+```
+
+或使用 yarn：
+```bash
+yarn install
+```
+
+### 3. 配置 API 地址
+
+如果 API 服务地址不是默认的 `http://localhost:8001`，请修改 `src/api/axios.js` 文件中的 `baseURL` 配置。
+
+## 运行项目
+
+### 开发模式
+
+```bash
+npm run dev
+```
+
+或使用 yarn：
+```bash
+yarn dev
+```
+
+### 生产构建
+
+```bash
+npm run build
+```
+
+或使用 yarn：
+```bash
+yarn build
+```
+
+构建产物将生成在 `dist` 目录中，可以部署到任何静态文件服务器。
+
+## 主要页面
+
+- **股票列表** (`/`) - 展示沪深300成分股，支持搜索和分页
+- **股票分析** (`/analysis/:code/:name`) - 对单只股票进行威科夫分析，展示分析结果和K线图
+- **关于** (`/about`) - 项目说明和相关信息
+- **配置** (`/config`) - 系统配置管理
+
+## 功能说明
+
+### 股票列表
+- 支持按股票代码或名称搜索
+- 支持分页浏览
+- 点击「分析」按钮进入股票分析页面
+
+### 股票分析
+- 支持选择日期范围进行分析
+- 展示分析结果，包括趋势、信号、置信度等
+- 绘制K线图展示股票走势
+- 展示分析历史记录，支持搜索和筛选
+
+### 配置管理
+- 展示系统配置列表
+- 支持编辑和保存配置
+- 支持按配置键、值或描述搜索
+
+## 技术栈
+
+- **前端框架**：Vue 3 + Composition API
+- **路由**：Vue Router
+- **UI 库**：Element Plus
+- **HTTP 客户端**：Axios
+- **图表库**：ECharts
+- **构建工具**：Vite
+
+## 注意事项
+
+1. 确保 API 服务已启动并运行在正确的地址
+2. 首次访问时可能需要加载沪深300成分股数据，可能会稍慢
+3. 威科夫分析功能需要一定时间执行，请耐心等待
+4. 建议使用现代浏览器访问，如 Chrome、Firefox、Edge 等
+
+## 故障排查
+
+- 如果页面显示无法连接到 API，请检查 API 服务是否已启动
+- 如果遇到依赖包安装错误，请确保使用了正确的 Node.js 版本
+- 如果页面显示空白或报错，请检查浏览器控制台的错误信息
+- 如果 K 线图无法显示，请检查股票历史数据是否正常加载
+
+## 联系方式
+
+如有问题，请联系项目维护人员。

@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import StockList from '../components/StockList.vue'
-import StockAnalysis from '../components/StockAnalysis.vue'
-import About from '../components/About.vue'
-import Config from '../components/Config.vue'
+import StockList from '../views/StockList.vue'
+import StockAnalysis from '../views/StockAnalysis.vue'
+import About from '../views/About.vue'
+import Config from '../views/Config.vue'
 
 const routes = [
   {

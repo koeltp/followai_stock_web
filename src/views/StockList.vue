@@ -66,7 +66,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
-import stockApi from '../api/stockApi';
+import api from '../api';
 
 export default {
   name: 'StockList',
@@ -87,7 +87,7 @@ export default {
     const loadHS300Stocks = async () => {
       loadingStocks.value = true;
       console.log('开始加载沪深300成分股，页码:', currentPage.value, '每页:', pageSize.value, '搜索词:', searchQuery.value);
-      const result = await stockApi.getHS300Stocks(
+      const result = await api.stocks.getHS300Stocks(
         currentPage.value, 
         pageSize.value,
         searchQuery.value || null

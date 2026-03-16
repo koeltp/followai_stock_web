@@ -99,7 +99,7 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
 import { Search } from '@element-plus/icons-vue';
-import stockApi from '../api/stockApi';
+import api from '../api';
 
 export default {
   name: 'Config',
@@ -118,7 +118,7 @@ export default {
     const loadConfigs = async () => {
       loading.value = true;
       try {
-        const response = await stockApi.getConfigs();
+        const response = await api.config.getConfigs();
         configs.value = response.configs;
       } catch (error) {
         console.error('加载配置失败:', error);
@@ -221,7 +221,7 @@ export default {
     const saveConfig = async (row) => {
       saving.value = true;
       try {
-        await stockApi.updateConfig(editForm.value);
+        await api.config.updateConfig(editForm.value);
         // 重新加载配置
         await loadConfigs();
         editingRow.value = null;
