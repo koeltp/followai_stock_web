@@ -3,6 +3,8 @@ import StockList from '../views/StockList.vue'
 import StockAnalysis from '../views/StockAnalysis.vue'
 import About from '../views/About.vue'
 import Config from '../views/Config.vue'
+import AnalysisLog from '../views/AnalysisLog.vue'
+import AnalysisHistory from '../views/AnalysisHistory.vue'
 
 const routes = [
   {
@@ -11,20 +13,30 @@ const routes = [
     component: StockList
   },
   {
+    path: '/analysis-history',
+    name: 'analysis-history',
+    component: AnalysisHistory
+  },
+  {
     path: '/analysis/:code/:name',
     name: 'analysis',
     component: StockAnalysis,
     props: true
   },
   {
-    path: '/about',
-    name: 'about',
-    component: About
-  },
-  {
     path: '/config',
     name: 'config',
     component: Config
+  },
+  {
+    path: '/analysis-logs',
+    name: 'analysis-logs',
+    component: AnalysisLog
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: About
   }
 ]
 

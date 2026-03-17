@@ -64,6 +64,41 @@ const wyckoffApi = {
       console.error('Error getting analysis history:', error);
       return { total: 0, items: [] };
     }
+  },
+
+  // 获取分析日志（支持搜索和日期范围）
+  getAnalysisLogs: async (code = null, page = 1, pageSize = 10, search = null, startDate = null, endDate = null) => {
+    try {
+      const params = { page, page_size: pageSize };
+      if (code) {
+        params.code = code;
+      }
+      if (search) {
+        params.search = search;
+      }
+      if (startDate) {
+        params.start_date = startDate;
+      }
+      if (endDate) {
+        params.end_date = endDate;
+      }
+      const response = await apiClient.get('/stocks/wyckoff/analysis-logs', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error getting analysis logs:', error);
+      return { total: 0, items: [] };
+    }
+  },
+
+  // 重新解析分析日志
+  reparseLog: async (logId) => {
+    try {
+      const response = await apiClient.post(`/stocks/wyckoff/reparse/${logId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error reparsing log:', error);
+      throw error;
+    }
   }
 };
 

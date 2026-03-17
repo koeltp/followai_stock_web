@@ -24,12 +24,12 @@ const updateRunTime = () => {
   const now = new Date();
   const startDate = new Date('2026-03-15T15:00:00');
   const diff = now - startDate;
-  
+
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-  
+
   runTimeDays.value = days.toString().padStart(2, '0');
   runTimeHours.value = hours.toString().padStart(2, '0');
   runTimeMinutes.value = minutes.toString().padStart(2, '0');
@@ -61,28 +61,24 @@ onUnmounted(() => {
       <div class="header-content">
         <img src="/logo.png" alt="FollowAI" class="site-logo" @click="navigateTo('/')" />
         <nav class="nav">
-                  <a 
-                    class="nav-item" 
-                    :class="{ active: currentPath === '/' }"
-                    @click="navigateTo('/')"
-                  >
-                    首页
-                  </a>
-                  <a 
-                    class="nav-item" 
-                    :class="{ active: currentPath === '/about' }"
-                    @click="navigateTo('/about')"
-                  >
-                    关于我们
-                  </a>
-                  <a 
-                    class="nav-item" 
-                    :class="{ active: currentPath === '/config' }"
-                    @click="navigateTo('/config')"
-                  >
-                    系统配置
-                  </a>
-                </nav>
+          <a class="nav-item" :class="{ active: currentPath === '/' }" @click="navigateTo('/')">
+            首页
+          </a>
+          <a class="nav-item" :class="{ active: currentPath === '/analysis-history' }"
+            @click="navigateTo('/analysis-history')">
+            分析历史
+          </a>
+          <a class="nav-item" :class="{ active: currentPath === '/analysis-logs' }"
+            @click="navigateTo('/analysis-logs')">
+            分析日志
+          </a>
+          <a class="nav-item" :class="{ active: currentPath === '/config' }" @click="navigateTo('/config')">
+            系统配置
+          </a>
+          <a class="nav-item" :class="{ active: currentPath === '/about' }" @click="navigateTo('/about')">
+            关于我们
+          </a>
+        </nav>
       </div>
     </header>
 
@@ -93,7 +89,9 @@ onUnmounted(() => {
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-section">
-          <p class="run-time">小破站已运行 <span class="time-days">{{ runTimeDays }}</span> 天 <span class="time-hours">{{ runTimeHours }}</span> 时 <span class="time-minutes">{{ runTimeMinutes }}</span> 分 <span class="time-seconds">{{ runTimeSeconds }}</span> 秒</p>
+          <p class="run-time">小破站已运行 <span class="time-days">{{ runTimeDays }}</span> 天 <span class="time-hours">{{
+              runTimeHours }}</span> 时 <span class="time-minutes">{{ runTimeMinutes }}</span> 分 <span
+              class="time-seconds">{{ runTimeSeconds }}</span> 秒</p>
         </div>
         <div class="footer-section">
           <p class="friend-links">
@@ -126,25 +124,25 @@ onUnmounted(() => {
 }
 
 .header {
-    background: #ffffff;
-    color: #333333;
-    padding: 1rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
+  background: #ffffff;
+  color: #333333;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 2rem;
-    max-width: 1400px;
-    width: 100%;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
 
 .site-logo {
   height: 40px;
@@ -199,15 +197,15 @@ onUnmounted(() => {
 }
 
 .footer-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-    text-align: center;
-    padding: 0 2rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+  padding: 0 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
 
 .footer-section {
   width: 100%;
@@ -218,35 +216,35 @@ onUnmounted(() => {
   .header-content {
     padding: 0 1rem;
   }
-  
+
   .nav {
     gap: 1rem;
   }
-  
+
   .nav-item {
     font-size: 0.9rem;
   }
-  
+
   .main-content {
     padding: 1rem;
   }
-  
+
   .footer-content {
     padding: 0 1rem;
   }
-  
+
   .friend-links {
     font-size: 0.8rem;
   }
-  
+
   .friend-link {
     padding: 0 0.3rem;
   }
-  
+
   .run-time {
     font-size: 0.8rem;
   }
-  
+
   .disclaimer {
     font-size: 0.75rem;
   }
@@ -258,30 +256,30 @@ onUnmounted(() => {
     gap: 1rem;
     padding: 1rem;
   }
-  
+
   .nav {
     width: 100%;
     justify-content: center;
   }
-  
+
   .site-logo {
     height: 32px;
   }
-  
+
   .friend-links {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.5rem;
   }
-  
+
   .friend-links::before {
     content: '友情链接：';
     display: block;
     width: 100%;
     margin-bottom: 0.5rem;
   }
-  
+
   .friend-link {
     padding: 0.2rem 0.5rem;
     background: rgba(255, 255, 255, 0.1);

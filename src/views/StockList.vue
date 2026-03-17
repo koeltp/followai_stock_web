@@ -86,16 +86,13 @@ export default {
     // 加载沪深300成分股
     const loadHS300Stocks = async () => {
       loadingStocks.value = true;
-      console.log('开始加载沪深300成分股，页码:', currentPage.value, '每页:', pageSize.value, '搜索词:', searchQuery.value);
       const result = await api.stocks.getHS300Stocks(
         currentPage.value, 
         pageSize.value,
         searchQuery.value || null
       );
-      console.log('API返回结果:', result);
       hs300Stocks.value = result.items || [];
       totalStocks.value = result.total || 0;
-      console.log('设置数据完成，股票数量:', hs300Stocks.value.length, '总数:', totalStocks.value);
       loadingStocks.value = false;
     };
 

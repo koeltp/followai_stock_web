@@ -16,23 +16,7 @@ const stocksApi = {
     }
   },
 
-  // 获取股票历史数据（用于K线图）
-  getStockHistory: async (code, startDate = null, endDate = null) => {
-    try {
-      const params = { code };
-      if (startDate) {
-        params.start_date = startDate;
-      }
-      if (endDate) {
-        params.end_date = endDate;
-      }
-      const response = await apiClient.get('/stocks/history', { params });
-      return response.data;
-    } catch (error) {
-      console.error('Error getting stock history:', error);
-      return { code, data: [] };
-    }
-  }
+
 };
 
 export default stocksApi;

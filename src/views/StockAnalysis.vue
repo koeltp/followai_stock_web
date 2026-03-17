@@ -4,9 +4,6 @@
     <div class="analysis-section">
       <div class="section-header">
         <h2 class="section-title">{{ stockName }} 威科夫分析</h2>
-        <el-button @click="backToList" type="default" size="small" plain>
-          返回列表
-        </el-button>
       </div>
       
       <div class="date-selection">
@@ -72,10 +69,7 @@
           </el-descriptions>
         </div>
 
-        <div v-if="analysisResult.code" class="kline-chart">
-          <h4>K线图</h4>
-          <div id="klineChart" ref="klineChartRef" class="chart-container"></div>
-        </div>
+
       </div>
 
       <el-empty v-else description="暂无分析结果，请选择日期范围并点击开始分析" />
@@ -111,6 +105,7 @@
       
       <!-- 搜索框 -->
       <div class="history-search">
+        <span class="date-label">创建日期：</span>
         <el-date-picker
           v-model="historyDateRange"
           type="daterange"
@@ -121,19 +116,6 @@
           value-format="YYYY-MM-DD"
           :shortcuts="getDateShortcuts()"
         />
-        <el-input
-          v-model="historySearchQuery"
-          placeholder="搜索分析历史..."
-          class="search-input"
-          @input="handleHistorySearchInput"
-          @blur="handleHistorySearchBlur"
-          clearable
-          @clear="handleHistorySearchClear"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
         
         <el-button @click="handleHistorySearchButton" type="primary">
           <el-icon><Search /></el-icon> 搜索
@@ -148,10 +130,10 @@
           highlight-current-row
           @row-click="handleHistoryRowClick"
         >
-          <el-table-column prop="start_date" label="开始日期" width="120" />
-          <el-table-column prop="end_date" label="结束日期" width="120" />
-          <el-table-column prop="trend" label="趋势" width="60" />
-          <el-table-column prop="signal" label="信号" width="70" show-overflow-tooltip>
+          <el-table-column prop="start_date" label="开始日期" width="100" />
+          <el-table-column prop="end_date" label="结束日期" width="100" />
+          <el-table-column prop="trend" label="趋势" width="80"  show-overflow-tooltip />
+          <el-table-column prop="signal" label="信号" width="80" show-overflow-tooltip>
               <template #default="{ row }">
                 <el-tag :type="getSignalType(row.signal)">
                   {{ row.signal }}
@@ -207,10 +189,9 @@
 </template>
 
 <script>
-import { ref, onMounted, nextTick, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
-import * as echarts from 'echarts';
 import api from '../api';
 
 export default {
@@ -221,8 +202,6 @@ export default {
   setup() {
     const route = useRoute();
     const router = useRouter();
-    const klineChartRef = ref(null);
-    let klineChart = null;
     
     const stockCode = ref(route.params.code || '');
     const costDialogVisible = ref(false);
@@ -282,10 +261,6 @@ export default {
           // 如果有历史记录且当前没有显示结果，显示最新的一条
           if (analysisHistoryItems.value.length > 0 && !analysisResult.value) {
             analysisResult.value = analysisHistoryItems.value[0];
-            // 加载K线图
-            setTimeout(() => {
-              loadKlineChart();
-            }, 100);
           }
         } else {
           analysisHistoryItems.value = [];
@@ -300,158 +275,9 @@ export default {
       }
     };
 
-    // 加载K线图数据
-    const loadKlineChart = async () => {
-      if (!analysisResult.value || !analysisResult.value.code) {
-        return;
-      }
-      
-      try {
-        const code = analysisResult.value.code;
-        const startDate = analysisResult.value.start_date;
-        const endDate = analysisResult.value.end_date;
-        
-        const response = await api.stocks.getStockHistory(code, startDate, endDate);
-        
-        if (response && response.data && response.data.length > 0) {
-          await nextTick();
-          drawKlineChart(response.data);
-        }
-      } catch (error) {
-        console.error('加载K线图失败:', error);
-      }
-    };
 
-    // 绘制K线图
-    const drawKlineChart = (data) => {
-      if (!klineChartRef.value) {
-        return;
-      }
-      
-      // 销毁旧的图表实例
-      if (klineChart) {
-        klineChart.dispose();
-      }
-      
-      try {
-        // 创建新的图表实例
-        klineChart = echarts.init(klineChartRef.value);
-        
-        // 准备数据
-        const dates = data.map(item => item.date);
-        const ohlcData = data.map(item => [item.open, item.close, item.low, item.high]);
-        const volumeData = data.map(item => item.volume);
-        
-        const option = {
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-              type: 'cross'
-            }
-          },
-          grid: [
-            {
-              left: '10%',
-              right: '10%',
-              height: '50%'
-            },
-            {
-              left: '10%',
-              right: '10%',
-              top: '70%',
-              height: '20%'
-            }
-          ],
-          xAxis: [
-            {
-              type: 'category',
-              data: dates,
-              scale: true,
-              boundaryGap: false,
-              axisLine: { onZero: false },
-              splitLine: { show: false }
-            },
-            {
-              type: 'category',
-              gridIndex: 1,
-              data: dates,
-              scale: true,
-              boundaryGap: false,
-              axisLine: { onZero: false },
-              axisLabel: { show: false },
-              splitLine: { show: false }
-            }
-          ],
-          yAxis: [
-            {
-              scale: true,
-              splitArea: { show: true }
-            },
-            {
-              scale: true,
-              gridIndex: 1,
-              splitNumber: 2,
-              axisLabel: { show: false },
-              axisLine: { show: false },
-              axisTick: { show: false },
-              splitLine: { show: false }
-            }
-          ],
-          dataZoom: [
-            {
-              type: 'inside',
-              xAxisIndex: [0, 1],
-              start: 50,
-              end: 100
-            }
-          ],
-          series: [
-            {
-              type: 'candlestick',
-              name: 'K线',
-              data: ohlcData,
-              itemStyle: {
-                color: '#ef232a',
-                color0: '#14b143',
-                borderColor: '#ef232a',
-                borderColor0: '#14b143'
-              }
-            },
-            {
-              name: '成交量',
-              type: 'bar',
-              xAxisIndex: 1,
-              yAxisIndex: 1,
-              data: volumeData,
-              itemStyle: {
-                color: (params) => {
-                  const dataIndex = params.dataIndex;
-                  const currentData = data[dataIndex];
-                  const prevData = data[dataIndex - 1];
-                  if (prevData && currentData.close > prevData.close) {
-                    return '#ef232a';
-                  } else if (prevData && currentData.close < prevData.close) {
-                    return '#14b143';
-                  }
-                  return '#999';
-                }
-              }
-            }
-          ]
-        };
-        
-        klineChart.setOption(option);
-      } catch (error) {
-        console.error('绘制K线图失败:', error);
-      }
-    };
 
-    // 监听分析结果变化，加载K线图
-    watch(analysisResult, (newVal) => {
-      if (newVal && newVal.code) {
-        loadKlineChart();
-      }
-    });
+
 
     // 处理历史记录搜索输入
     let historySearchTimer = null;
@@ -538,10 +364,7 @@ export default {
       return signalMap[signal] || 'info';
     };
 
-    // 返回列表
-    const backToList = () => {
-      router.push({ name: 'home' });
-    };
+
 
     // 选择最近三个月
     const selectLastThreeMonths = () => {
@@ -622,7 +445,6 @@ export default {
       loadingHistory,
       historySearchQuery,
       historyDateRange,
-      klineChartRef,
       costDialogVisible,
       selectedAnalysis,
       getDateShortcuts,
@@ -637,8 +459,7 @@ export default {
       handleHistoryRowClick,
       showCostDialog,
       getRiskType,
-      getSignalType,
-      backToList
+      getSignalType
     };
   }
 };
@@ -718,10 +539,19 @@ export default {
 }
 
 .analysis-details h4 {
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1a1a2e;
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.analysis-details :deep(.el-descriptions__label) {
+    width: 120px !important;
+    font-weight: 600 !important;
+}
+
+.analysis-details :deep(.el-descriptions__content) {
+    width: calc(100% - 120px) !important;
 }
 
 .details-content {
@@ -781,6 +611,11 @@ export default {
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   width: fit-content;
+}
+
+.date-label {
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .search-input {
@@ -888,20 +723,5 @@ export default {
   }
 }
 
-.kline-chart {
-  margin-top: 2rem;
-}
 
-.kline-chart h4 {
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1a1a2e;
-}
-
-.chart-container {
-  width: 100%;
-  height: 500px;
-  min-width: 600px;
-}
 </style>
