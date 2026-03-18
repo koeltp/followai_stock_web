@@ -8,9 +8,7 @@
         <span class="market-label">市场：</span>
         <el-select v-model="selectedMarket" placeholder="选择市场" class="market-select" size="large">
           <el-option label="全部" value="" />
-          <el-option label="A股" value="A" />
-          <el-option label="港股" value="HK" />
-          <el-option label="美股" value="US" />
+          <el-option v-for="option in marketOptions" :key="option.value" :label="option.label" :value="option.value" />
         </el-select>
         
         <span class="date-label">创建日期：</span>
@@ -59,7 +57,7 @@
         <el-table-column prop="code" label="股票代码" width="90" />
         <el-table-column label="股票名称" width="120">
             <template #default="{ row }">
-              <a :href="`https://stockpage.10jqka.com.cn/${row.code.replace(/^[a-z]+\./i, '')}/`" target="_blank" rel="noopener noreferrer" class="stock-name-link" title="去同花顺查K线图">
+              <a :href="getStockLink(row)" target="_blank" rel="noopener noreferrer" class="stock-name-link" title="去同花顺查K线图">
                 {{ row.name }}
               </a>
             </template>
@@ -151,6 +149,8 @@ import { useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
 import api from '../api';
 import { getDateShortcuts } from '../utils/dateUtils';
+import { getStockLink } from '../utils/stockUtils';
+import { marketOptions } from '../data/constants';
 
 export default {
   name: 'AnalysisHistory',
@@ -293,6 +293,8 @@ export default {
     };
 
 
+
+
     onMounted(() => {
       loadAnalysisHistory();
     });
@@ -308,6 +310,7 @@ export default {
       selectedMarket,
       costDialogVisible,
       selectedAnalysis,
+      marketOptions,
       loadAnalysisHistory,
       handleSearchInput,
       handleSearchButton,
@@ -318,7 +321,8 @@ export default {
       handleRowClick,
       showCostDialog,
       getSignalType,
-      getDateShortcuts
+      getDateShortcuts,
+      getStockLink
     };
   }
 };

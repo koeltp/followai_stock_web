@@ -28,7 +28,7 @@
         <h3 class="result-title">分析结果</h3>
         <el-descriptions :column="2" border>
           <el-descriptions-item label="股票名称">
-            <a :href="`https://stockpage.10jqka.com.cn/${analysisResult.code.replace(/^[a-z]+\./i, '')}/`" target="_blank" rel="noopener noreferrer" class="stock-name-link">
+            <a :href="getStockLink(analysisResult)" target="_blank" rel="noopener noreferrer" class="stock-name-link">
               {{ analysisResult.name }}
             </a>
           </el-descriptions-item>
@@ -195,6 +195,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
 import api from '../api';
+import { getStockLink } from '../utils/stockUtils';
 
 export default {
   name: 'StockAnalysis',
@@ -461,7 +462,8 @@ export default {
       handleHistoryRowClick,
       showCostDialog,
       getRiskType,
-      getSignalType
+      getSignalType,
+      getStockLink
     };
   }
 };

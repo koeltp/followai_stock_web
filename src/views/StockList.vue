@@ -16,9 +16,7 @@
         <span class="market-label">市场：</span>
         <el-select v-model="selectedMarket" placeholder="选择市场" class="market-select" size="large" @change="handleMarketChange">
           <el-option label="全部" value="" />
-          <el-option label="A股" value="A" />
-          <el-option label="港股" value="HK" />
-          <el-option label="美股" value="US" />
+          <el-option v-for="option in marketOptions" :key="option.value" :label="option.label" :value="option.value" />
         </el-select>
         <el-input
           v-model="searchQuery"
@@ -44,7 +42,7 @@
         <el-table-column prop="code" label="股票代码" width="150" />
         <el-table-column label="股票名称">
           <template #default="{ row }">
-            <a :href="`https://stockpage.10jqka.com.cn/${row.code.replace(/^[a-z]+\./i, '')}/`" target="_blank" rel="noopener noreferrer" class="stock-name-link">
+            <a :href="getStockLink(row)" target="_blank" rel="noopener noreferrer" class="stock-name-link">
               {{ row.name }}
             </a>
           </template>
@@ -94,9 +92,7 @@
       <el-form :model="addStockForm" label-width="80px">
         <el-form-item label="市场类型">
           <el-select v-model="addStockForm.market_type" placeholder="请选择市场类型" @change="handleMarketTypeChange">
-            <el-option label="A股" value="A" />
-            <el-option label="港股" value="HK" />
-            <el-option label="美股" value="US" />
+            <el-option v-for="option in marketOptions" :key="option.value" :label="option.label" :value="option.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="股票代码">
@@ -120,6 +116,8 @@ import { useRouter } from 'vue-router';
 import { Search, Plus } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import api from '../api';
+import { getStockLink } from '../utils/stockUtils';
+import { marketOptions } from '../data/constants';
 
 export default {
   name: 'StockList',
@@ -279,6 +277,8 @@ export default {
       return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
     };
 
+
+
     onMounted(() => {
       loadHS300Stocks();
     });
@@ -300,6 +300,7 @@ export default {
       showAddStockDialog,
       handleAddStock,
       handleSyncStock,
+      marketOptions,
       loadHS300Stocks,
       handleSearchButton,
       handleMarketChange,
@@ -308,7 +309,8 @@ export default {
       goToAnalysis,
       handleSizeChange,
       handleCurrentChange,
-      tableRowClassName
+      tableRowClassName,
+      getStockLink
     };
   }
 };
