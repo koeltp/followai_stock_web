@@ -3,23 +3,40 @@
 
     <!-- 沪深300成分股列表 -->
     <div class="stocks-section">
-      <h2 class="section-title">股票列表</h2>
+      <div class="section-header">
+        <h2 class="section-title">股票列表</h2>
+        <el-button type="primary" @click="showAddStockDialog" class="add-stock-button" size="large">
+          <el-icon style="margin-right: 5px"><Plus /></el-icon>
+          添加股票
+        </el-button>
+      </div>
       
       <!-- 搜索框 -->
       <div class="search-container">
+        <span class="market-label">市场：</span>
+        <el-select v-model="selectedMarket" placeholder="选择市场" class="market-select" size="large" @change="handleMarketChange($event)">
+          <el-option label="全部" value="" />
+          <el-option label="A股" value="A" />
+          <el-option label="港股" value="HK" />
+          <el-option label="美股" value="US" />
+        </el-select>
         <el-input
           v-model="searchQuery"
           placeholder="搜索股票代码或名称"
           clearable
-          @input="handleSearchInput"
           @blur="handleSearchBlur"
           @clear="handleSearchClear"
           class="search-input"
+          size="large"
         >
           <template #prefix>
-            <el-icon><Search /></el-icon>
+            <el-icon class="search-icon"><Search /></el-icon>
           </template>
         </el-input>
+        <el-button type="primary" @click="handleSearchButton" class="search-button" size="large">
+          <el-icon style="margin-right: 5px"><Search /></el-icon>
+          搜索
+        </el-button>
       </div>
       
       <el-table :data="hs300Stocks" class="stocks-table" v-loading="loadingStocks" :row-class-name="tableRowClassName">
@@ -31,10 +48,21 @@
             </a>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column label="市场" width="80">
+          <template #default="{ row }">
+            <el-tag v-if="row.market_type === 'A'" type="success">A股</el-tag>
+            <el-tag v-else-if="row.market_type === 'US'" type="warning">美股</el-tag>
+            <el-tag v-else-if="row.market_type === 'HK'" type="danger">港股</el-tag>
+            <el-tag v-else>{{ row.market_type }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="280">
           <template #default="{ row }">
             <el-button @click="goToAnalysis(row)" type="primary" plain>
               分析
+            </el-button>
+            <el-button @click="handleSyncStock(row)" :loading="syncingStock === row.code" type="success">
+              同步
             </el-button>
           </template>
         </el-table-column>
@@ -59,19 +87,44 @@
         />
       </div>
     </div>
+
+    <!-- 添加股票对话框 -->
+    <el-dialog v-model="addStockDialogVisible" title="添加股票" width="500px">
+      <el-form :model="addStockForm" label-width="80px">
+        <el-form-item label="市场类型">
+          <el-select v-model="addStockForm.market_type" placeholder="请选择市场类型" @change="handleMarketTypeChange">
+            <el-option label="A股" value="A" />
+            <el-option label="港股" value="HK" />
+            <el-option label="美股" value="US" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="股票代码">
+          <el-input v-model="addStockForm.code" :placeholder="codePlaceholder" />
+        </el-form-item>
+        <el-form-item label="股票名称">
+          <el-input v-model="addStockForm.name" placeholder="请输入股票名称" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addStockDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleAddStock" :loading="addingStock">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { Search } from '@element-plus/icons-vue';
+import { Search, Plus } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 import api from '../api';
 
 export default {
   name: 'StockList',
   components: {
-    Search
+    Search,
+    Plus
   },
   setup() {
     const router = useRouter();
@@ -82,58 +135,125 @@ export default {
     const pageSize = ref(10);
     const totalStocks = ref(0);
     const searchQuery = ref('');
+    const selectedMarket = ref('');
+    const syncingStock = ref(null);
+    const addStockDialogVisible = ref(false);
+    const addingStock = ref(false);
+    const addStockForm = ref({
+      code: '',
+      name: '',
+      market_type: 'A'
+    });
 
-    // 加载沪深300成分股
+    const codePlaceholder = computed(() => {
+      if (addStockForm.value.market_type === 'A') {
+        return '例如: sh.600000 或 sz.000001';
+      } else if (addStockForm.value.market_type === 'HK') {
+        return '例如: 00700';
+      } else if (addStockForm.value.market_type === 'US') {
+        return '例如: AAPL';
+      }
+      return '请输入股票代码';
+    });
+
+    const handleMarketTypeChange = () => {
+      addStockForm.value.code = '';
+    };
+
+    const showAddStockDialog = () => {
+      addStockForm.value = {
+        code: '',
+        name: '',
+        market_type: 'A'
+      };
+      addStockDialogVisible.value = true;
+    };
+
+    const handleAddStock = async () => {
+      if (!addStockForm.value.code || !addStockForm.value.name) {
+        ElMessage.warning('请输入股票代码和名称');
+        return;
+      }
+      
+      addingStock.value = true;
+      try {
+        const result = await api.stocks.addStock(
+          addStockForm.value.code,
+          addStockForm.value.name,
+          addStockForm.value.market_type
+        );
+        
+        if (result.success) {
+          ElMessage.success('股票添加成功');
+          addStockDialogVisible.value = false;
+          loadHS300Stocks();
+        } else {
+          ElMessage.error(result.message || '添加股票失败');
+        }
+      } catch (error) {
+        ElMessage.error('添加股票失败: ' + error.message);
+      } finally {
+        addingStock.value = false;
+      }
+    };
+
+    const handleSyncStock = async (stock) => {
+      syncingStock.value = stock.code;
+      try {
+        const marketType = stock.market_type || 'A';
+        const result = await api.stocks.syncStock(stock.code, marketType);
+        
+        if (result.success) {
+          ElMessage.success(result.message);
+        } else {
+          ElMessage.error(result.message || '同步失败');
+        }
+      } catch (error) {
+        ElMessage.error('同步失败: ' + error.message);
+      } finally {
+        syncingStock.value = null;
+      }
+    };
+
     const loadHS300Stocks = async () => {
       loadingStocks.value = true;
-      const result = await api.stocks.getHS300Stocks(
+      console.log('加载股票列表参数:', {
+        page: currentPage.value,
+        pageSize: pageSize.value,
+        search: searchQuery.value || null,
+        market: selectedMarket.value || null
+      });
+      const result = await api.stocks.getStockList(
         currentPage.value, 
         pageSize.value,
-        searchQuery.value || null
+        searchQuery.value || null,
+        selectedMarket.value || null
       );
       hs300Stocks.value = result.items || [];
       totalStocks.value = result.total || 0;
       loadingStocks.value = false;
     };
 
-    // 处理搜索输入
-    let searchTimer = null;
-    const handleSearchInput = () => {
-      // 去除前后空格
-      searchQuery.value = searchQuery.value.trim();
-      if (searchTimer) {
-        clearTimeout(searchTimer);
-      }
-      searchTimer = setTimeout(() => {
-        currentPage.value = 1;
-        loadHS300Stocks();
-      }, 300);
-    };
-
-    // 处理搜索按钮点击
     const handleSearchButton = () => {
-      // 去除前后空格
       searchQuery.value = searchQuery.value.trim();
       currentPage.value = 1;
       loadHS300Stocks();
     };
 
-    // 处理光标失焦
+    const handleMarketChange = (value) => {
+      console.log('市场选择变化:', value);
+      selectedMarket.value = value;
+      currentPage.value = 1;
+    };
+
     const handleSearchBlur = () => {
-      // 光标失焦时执行搜索，去除前后空格
       searchQuery.value = searchQuery.value.trim();
-      currentPage.value = 1;
-      loadHS300Stocks();
     };
 
-    // 处理搜索清空
     const handleSearchClear = () => {
       searchQuery.value = '';
-      currentPage.value = 1;
-      loadHS300Stocks();
     };
 
-    // 跳转到分析页面
     const goToAnalysis = (stock) => {
       router.push({
         name: 'analysis',
@@ -144,20 +264,17 @@ export default {
       });
     };
 
-    // 处理分页大小变化
     const handleSizeChange = (size) => {
       pageSize.value = size;
       currentPage.value = 1;
       loadHS300Stocks();
     };
 
-    // 处理页码变化
     const handleCurrentChange = (current) => {
       currentPage.value = current;
       loadHS300Stocks();
     };
 
-    // 表格行样式类名
     const tableRowClassName = ({ rowIndex }) => {
       return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
     };
@@ -173,9 +290,18 @@ export default {
       pageSize,
       totalStocks,
       searchQuery,
+      syncingStock,
+      addStockDialogVisible,
+      addingStock,
+      addStockForm,
+      codePlaceholder,
+      handleMarketTypeChange,
+      showAddStockDialog,
+      handleAddStock,
+      handleSyncStock,
       loadHS300Stocks,
-      handleSearchInput,
       handleSearchButton,
+      handleMarketChange,
       handleSearchBlur,
       handleSearchClear,
       goToAnalysis,
@@ -201,8 +327,15 @@ export default {
   padding: 0;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 .section-title {
-  margin: 0 0 1.5rem 0;
+  margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
   color: #1a1a2e;
@@ -210,11 +343,85 @@ export default {
 
 .search-container {
   margin-bottom: 2rem;
-  max-width: 400px;
+  max-width: 1000px;
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.market-label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.market-select {
+  width: 120px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.market-select :deep(.el-input__wrapper) {
+  border: none;
+  box-shadow: none;
+}
+
+.market-select:focus-within {
+  border-color: #45b7d1;
+  box-shadow: 0 0 0 3px rgba(69, 183, 209, 0.1);
 }
 
 .search-input {
-  width: 100%;
+  flex: 1;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.search-input :deep(.el-input__wrapper) {
+  box-shadow: none;
+}
+
+.search-input:focus-within {
+  border-color: #45b7d1;
+  box-shadow: 0 0 0 3px rgba(69, 183, 209, 0.1);
+}
+
+.search-icon {
+  color: #95a5a6;
+  transition: color 0.3s ease;
+}
+
+.search-input:focus-within .search-icon {
+  color: #45b7d1;
+}
+
+.search-button {
+  height: 44px;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 0 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.search-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.add-stock-button {
+  height: 44px;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 0 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.add-stock-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(69, 183, 209, 0.3);
 }
 
 .stocks-table {
@@ -254,17 +461,35 @@ export default {
     font-size: 1.5rem;
   }
   
+  .section-title {
+    font-size: 1.3rem;
+  }
+  
   .search-container {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.8rem;
+    padding: 0.8rem;
   }
   
-  .el-input {
+  .market-select {
     width: 100%;
+    height: 40px;
+  }
+  
+  .search-input {
+    width: 100%;
+    height: 40px;
   }
   
   .search-button {
     width: 100%;
+    height: 40px;
+  }
+  
+  .add-stock-button {
+    width: 100%;
+    height: 40px;
   }
   
   .el-table {
@@ -317,6 +542,10 @@ export default {
   .page-title {
     font-size: 1.3rem;
     text-align: center;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
   }
   
   .search-container {

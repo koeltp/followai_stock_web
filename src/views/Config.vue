@@ -18,13 +18,14 @@
           @input="handleSearchInput"
           @clear="handleSearchClear"
           class="search-input"
+          size="large"
           @keyup.enter="handleSearch"
         >
           <template #prefix>
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        <el-button type="primary" @click="handleSearch" class="search-button">
+        <el-button type="primary" @click="handleSearch" class="search-button" size="large">
           搜索
         </el-button>
       </div>
@@ -38,7 +39,7 @@
         default-expand-all
       >
         <el-table-column prop="config_key" label="配置键" width="250" />
-        <el-table-column prop="config_value" label="配置值" min-width="300">
+        <el-table-column prop="config_value" label="配置值" min-width="300" show-overflow-tooltip>
           <template #default="{ row }">
             <el-input
               v-if="editingRow === row.id"
@@ -49,7 +50,7 @@
             <span v-else>{{ row.config_value }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="250">
+        <el-table-column prop="description" label="描述" min-width="250" show-overflow-tooltip>
           <template #default="{ row }">
             <el-input
               v-if="editingRow === row.id"

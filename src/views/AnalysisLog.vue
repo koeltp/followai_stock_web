@@ -18,6 +18,7 @@
           value-format="YYYY-MM-DD"
           :shortcuts="getDateShortcuts()"
           class="date-picker"
+          size="large"
         />
         <el-input
           v-model="searchQuery"
@@ -27,13 +28,14 @@
           @blur="handleSearchBlur"
           clearable
           @clear="handleSearchClear"
+          size="large"
         >
           <template #prefix>
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
         
-        <el-button @click="handleSearchButton" type="primary">
+        <el-button @click="handleSearchButton" type="primary" size="large">
           <el-icon><Search /></el-icon> 搜索
         </el-button>
       </div>

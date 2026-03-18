@@ -16,8 +16,9 @@
           format="YYYY-MM-DD"
           value-format="YYYY-MM-DD"
           :shortcuts="getDateShortcuts()"
+          size="large"
         />
-        <el-button @click="analyzeStock" type="primary" :loading="analyzing">
+        <el-button @click="analyzeStock" type="primary" :loading="analyzing" size="large">
           开始分析
         </el-button>
       </div>
@@ -115,9 +116,10 @@
           format="YYYY-MM-DD"
           value-format="YYYY-MM-DD"
           :shortcuts="getDateShortcuts()"
+          size="large"
         />
         
-        <el-button @click="handleHistorySearchButton" type="primary">
+        <el-button @click="handleHistorySearchButton" type="primary" size="large">
           <el-icon><Search /></el-icon> 搜索
         </el-button>
       </div>
