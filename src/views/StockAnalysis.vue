@@ -556,25 +556,8 @@ export default {
     width: calc(100% - 120px) !important;
 }
 
-.details-content {
-  background: #fafafa;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #f0f0f0;
-  min-width: 600px;
-}
-
 .analysis-result .el-descriptions {
   min-width: 600px;
-}
-
-.details-content pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-size: 0.85rem;
-  line-height: 1.6;
-  margin: 0;
-  color: #666666;
 }
 
 .analysis-history {

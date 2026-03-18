@@ -337,7 +337,7 @@ onUnmounted(() => {
 
 .friend-link:hover {
   color: #45b7d1;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .disclaimer {
