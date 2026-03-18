@@ -40,6 +40,7 @@
       </div>
       
       <el-table :data="hs300Stocks" class="stocks-table" v-loading="loadingStocks" :row-class-name="tableRowClassName">
+        <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="code" label="股票代码" width="150" />
         <el-table-column label="股票名称">
           <template #default="{ row }">

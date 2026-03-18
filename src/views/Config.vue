@@ -38,16 +38,17 @@
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
         default-expand-all
       >
-        <el-table-column prop="config_key" label="配置键" width="250" />
-        <el-table-column prop="config_value" label="配置值" min-width="300" show-overflow-tooltip>
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="key_name" label="配置键" width="250" />
+        <el-table-column prop="key_value" label="配置值" min-width="300" show-overflow-tooltip>
           <template #default="{ row }">
             <el-input
               v-if="editingRow === row.id"
-              v-model="editForm.config_value"
+              v-model="editForm.key_value"
               type="text"
               size="small"
             />
-            <span v-else>{{ row.config_value }}</span>
+            <span v-else>{{ row.key_value }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="description" label="描述" min-width="250" show-overflow-tooltip>
@@ -119,8 +120,9 @@ export default {
     const loadConfigs = async () => {
       loading.value = true;
       try {
-        const response = await api.config.getConfigs();
-        configs.value = response.configs;
+        const data = await api.config.getConfigs();
+        configs.value = data.configs;
+        console.log('加载的配置数据:', configs.value);
       } catch (error) {
         console.error('加载配置失败:', error);
       } finally {
@@ -129,10 +131,14 @@ export default {
     };
     
     // 将扁平数据转换为树形结构
-    const buildTree = (data, parentId = 0) => {
+    const buildTree = (data, parentId = '0') => {
       const result = [];
       for (const item of data) {
-        if (item.parent === parentId) {
+        // 统一处理 parent 字段值，确保类型一致
+        const itemParent = String(item.parent);
+        const currentParentId = String(parentId);
+        
+        if (itemParent === currentParentId) {
           const children = buildTree(data, item.id);
           if (children.length > 0) {
             item.children = children;
@@ -148,8 +154,8 @@ export default {
     const filterTree = (tree, query) => {
       const result = [];
       for (const item of tree) {
-        const match = item.config_key.toLowerCase().includes(query) || 
-                      (item.config_value && item.config_value.toLowerCase().includes(query)) ||
+        const match = item.key_name.toLowerCase().includes(query) || 
+                      (item.key_value && item.key_value.toLowerCase().includes(query)) ||
                       (item.description && item.description.toLowerCase().includes(query));
         
         let filteredChildren = [];
@@ -206,8 +212,8 @@ export default {
     const editConfig = (row) => {
       editingRow.value = row.id;
       editForm.value = {
-        config_key: row.config_key,
-        config_value: row.config_value,
+        key_name: row.key_name,
+        key_value: row.key_value,
         description: row.description
       };
     };
