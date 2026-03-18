@@ -5,6 +5,14 @@
     <!-- 搜索框 -->
     <div class="search-container">
       <div class="search-row">
+        <span class="market-label">市场：</span>
+        <el-select v-model="selectedMarket" placeholder="选择市场" class="market-select" size="large">
+          <el-option label="全部" value="" />
+          <el-option label="A股" value="A" />
+          <el-option label="港股" value="HK" />
+          <el-option label="美股" value="US" />
+        </el-select>
+        
         <span class="date-label">创建日期：</span>
         <el-date-picker
           v-model="dateRange"
@@ -159,6 +167,7 @@ export default {
     const loading = ref(false);
     const dateRange = ref([]);
     const searchQuery = ref('');
+    const selectedMarket = ref('');
     const costDialogVisible = ref(false);
     const selectedAnalysis = ref(null);
 
@@ -176,7 +185,8 @@ export default {
           pageSize.value,
           searchQuery.value || null,
           startDate,
-          endDate
+          endDate,
+          selectedMarket.value || null
         );
         
         // 确保 result 是对象且包含必要的字段
@@ -295,6 +305,7 @@ export default {
       loading,
       dateRange,
       searchQuery,
+      selectedMarket,
       costDialogVisible,
       selectedAnalysis,
       loadAnalysisHistory,
@@ -341,9 +352,14 @@ export default {
   width: fit-content;
 }
 
+.market-label,
 .date-label {
   font-weight: 500;
   white-space: nowrap;
+}
+
+.market-select {
+  width: 120px;
 }
 
 .date-picker {

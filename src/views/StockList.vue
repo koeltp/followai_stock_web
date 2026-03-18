@@ -14,7 +14,7 @@
       <!-- 搜索框 -->
       <div class="search-container">
         <span class="market-label">市场：</span>
-        <el-select v-model="selectedMarket" placeholder="选择市场" class="market-select" size="large" @change="handleMarketChange($event)">
+        <el-select v-model="selectedMarket" placeholder="选择市场" class="market-select" size="large" @change="handleMarketChange">
           <el-option label="全部" value="" />
           <el-option label="A股" value="A" />
           <el-option label="港股" value="HK" />
@@ -62,7 +62,7 @@
               分析
             </el-button>
             <el-button @click="handleSyncStock(row)" :loading="syncingStock === row.code" type="success">
-              同步
+              同步历史K线数据
             </el-button>
           </template>
         </el-table-column>
@@ -242,7 +242,6 @@ export default {
 
     const handleMarketChange = (value) => {
       console.log('市场选择变化:', value);
-      selectedMarket.value = value;
       currentPage.value = 1;
     };
 
@@ -290,6 +289,7 @@ export default {
       pageSize,
       totalStocks,
       searchQuery,
+      selectedMarket,
       syncingStock,
       addStockDialogVisible,
       addingStock,

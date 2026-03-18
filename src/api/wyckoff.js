@@ -43,7 +43,7 @@ const wyckoffApi = {
   },
 
   // 获取分析历史（支持搜索和日期范围）
-  getAnalysisHistory: async (code = null, page = 1, pageSize = 10, search = null, startDate = null, endDate = null) => {
+  getAnalysisHistory: async (code = null, page = 1, pageSize = 10, search = null, startDate = null, endDate = null, market = null) => {
     try {
       const params = { page, page_size: pageSize };
       if (code) {
@@ -57,6 +57,9 @@ const wyckoffApi = {
       }
       if (endDate) {
         params.end_date = endDate;
+      }
+      if (market) {
+        params.market = market;
       }
       const response = await apiClient.get('/stocks/wyckoff/analysis-history', { params });
       return response.data;
