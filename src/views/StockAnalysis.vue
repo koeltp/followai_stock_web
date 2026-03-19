@@ -3,7 +3,7 @@
     <!-- 单股分析 -->
     <div class="analysis-section">
       <div class="section-header">
-        <h2 class="section-title">{{ stockName }} 威科夫分析</h2>
+        <h2 class="section-title">分析 {{ stockName }}</h2>
       </div>
       
       <div class="date-selection">
@@ -18,6 +18,9 @@
           :shortcuts="getDateShortcuts()"
           size="large"
         />
+        <el-button @click="syncStockData" type="primary" :loading="syncing" size="large" style="margin-right: 10px;">
+          同步历史K线数据
+        </el-button>
         <el-button @click="analyzeStock" type="primary" :loading="analyzing" size="large">
           开始分析
         </el-button>
@@ -194,8 +197,10 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 import api from '../api';
 import { getStockLink } from '../utils/stockUtils';
+import { getDateShortcuts } from '../utils/dateUtils';
 
 export default {
   name: 'StockAnalysis',
@@ -212,6 +217,7 @@ export default {
     const stockName = ref(route.params.name || '');
     const dateRange = ref([]);
     const analyzing = ref(false);
+    const syncing = ref(false);
     const analysisResult = ref(null);
     const analysisHistoryItems = ref([]);
     const analysisHistoryTotal = ref(0);
@@ -236,6 +242,40 @@ export default {
       analyzing.value = false;
       // 重新加载分析历史
       loadAnalysisHistory();
+    };
+
+    // 同步股票历史数据
+    const syncStockData = async () => {
+      if (!stockCode.value) {
+        return;
+      }
+      
+      syncing.value = true;
+      try {
+        // 从股票代码中提取市场类型
+        let marketType = 'A';
+        if (stockCode.value.endsWith('.US')) {
+          marketType = 'US';
+        } else if (stockCode.value.endsWith('.HK')) {
+          marketType = 'HK';
+        }
+        
+        // 获取当前选择的日期范围
+        const startDate = dateRange.value && dateRange.value.length === 2 ? dateRange.value[0] : null;
+        const endDate = dateRange.value && dateRange.value.length === 2 ? dateRange.value[1] : null;
+        
+        const result = await api.stocks.syncStock(stockCode.value, marketType, startDate, endDate);
+        
+        if (result.success) {
+          ElMessage.success(result.message);
+        } else {
+          ElMessage.error(result.message || '同步失败');
+        }
+      } catch (error) {
+        ElMessage.error('同步失败: ' + error.message);
+      } finally {
+        syncing.value = false;
+      }
     };
 
     // 加载分析历史
@@ -373,7 +413,7 @@ export default {
     const selectLastThreeMonths = () => {
       const today = new Date();
       const threeMonthsAgo = new Date();
-      threeMonthsAgo.setMonth(today.getMonth() - 3);
+      threeMonthsAgo.setMonth(today.getMonth() - 12);
       
       dateRange.value = [
         threeMonthsAgo.toISOString().split('T')[0],
@@ -386,54 +426,6 @@ export default {
       selectLastThreeMonths();
       loadAnalysisHistory();
     });
-
-    // 生成日期选择器的快捷选项
-    const getDateShortcuts = () => {
-      return [
-        {
-          text: '上周',
-          value: () => {
-            const today = new Date();
-            const lastWeek = new Date();
-            lastWeek.setDate(today.getDate() - 7);
-            const lastMonday = new Date(lastWeek);
-            const day = lastWeek.getDay();
-            const diff = lastWeek.getDate() - day + (day === 0 ? -6 : 1);
-            lastMonday.setDate(diff);
-            const lastSunday = new Date(lastMonday);
-            lastSunday.setDate(lastMonday.getDate() + 6);
-            return [
-              lastMonday.toISOString().split('T')[0],
-              lastSunday.toISOString().split('T')[0]
-            ];
-          }
-        },
-        {
-          text: '上个月',
-          value: () => {
-            const today = new Date();
-            const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-            return [
-              firstDayOfLastMonth.toISOString().split('T')[0],
-              lastDayOfLastMonth.toISOString().split('T')[0]
-            ];
-          }
-        },
-        {
-          text: '最近三个月',
-          value: () => {
-            const today = new Date();
-            const threeMonthsAgo = new Date();
-            threeMonthsAgo.setMonth(today.getMonth() - 3);
-            return [
-              threeMonthsAgo.toISOString().split('T')[0],
-              today.toISOString().split('T')[0]
-            ];
-          }
-        }
-      ];
-    };
 
     return {
       stockCode,
@@ -463,7 +455,10 @@ export default {
       showCostDialog,
       getRiskType,
       getSignalType,
-      getStockLink
+      getStockLink,
+      getDateShortcuts,
+      syncStockData,
+      syncing
     };
   }
 };

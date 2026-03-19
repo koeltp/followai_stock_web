@@ -60,9 +60,6 @@
             <el-button @click="goToAnalysis(row)" type="primary" plain>
               分析
             </el-button>
-            <el-button @click="handleSyncStock(row)" :loading="syncingStock === row.code" type="success">
-              同步历史K线数据
-            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -135,7 +132,6 @@ export default {
     const totalStocks = ref(0);
     const searchQuery = ref('');
     const selectedMarket = ref('');
-    const syncingStock = ref(null);
     const addStockDialogVisible = ref(false);
     const addingStock = ref(false);
     const addStockForm = ref({
@@ -193,24 +189,6 @@ export default {
         ElMessage.error('添加股票失败: ' + error.message);
       } finally {
         addingStock.value = false;
-      }
-    };
-
-    const handleSyncStock = async (stock) => {
-      syncingStock.value = stock.code;
-      try {
-        const marketType = stock.market_type || 'A';
-        const result = await api.stocks.syncStock(stock.code, marketType);
-        
-        if (result.success) {
-          ElMessage.success(result.message);
-        } else {
-          ElMessage.error(result.message || '同步失败');
-        }
-      } catch (error) {
-        ElMessage.error('同步失败: ' + error.message);
-      } finally {
-        syncingStock.value = null;
       }
     };
 
@@ -291,7 +269,6 @@ export default {
       totalStocks,
       searchQuery,
       selectedMarket,
-      syncingStock,
       addStockDialogVisible,
       addingStock,
       addStockForm,
@@ -299,17 +276,16 @@ export default {
       handleMarketTypeChange,
       showAddStockDialog,
       handleAddStock,
-      handleSyncStock,
-      marketOptions,
       loadHS300Stocks,
       handleSearchButton,
       handleMarketChange,
       handleSearchBlur,
       handleSearchClear,
-      goToAnalysis,
       handleSizeChange,
       handleCurrentChange,
+      goToAnalysis,
       tableRowClassName,
+      marketOptions,
       getStockLink
     };
   }

@@ -34,6 +34,15 @@ export const getDateShortcuts = () => {
       }
     },
     {
+      text: '近一年',
+      value: () => {
+        const end = new Date();
+        const start = new Date();
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 365);
+        return [start, end];
+      }
+    },
+    {
       text: '今年',
       value: () => {
         const end = new Date();
