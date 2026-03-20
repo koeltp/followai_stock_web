@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// 创建axios实例
+// 从环境变量获取 API 基础路径
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8001',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
